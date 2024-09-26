@@ -1,0 +1,119 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests"> 
+    <title>My Cloud Run App</title>
+    <link href="https://unpkg.com/tabulator-tables@6.2.3/dist/css/tabulator.min.css" rel="stylesheet">
+    <script type="text/javascript" src="https://unpkg.com/tabulator-tables@6.2.3/dist/js/tabulator.min.js"></script>
+    <script src="https://www.gstatic.com/charts/loader.js"></script>
+</script>
+
+</head>
+<body>
+    <h1>World Bank Data on Income Levels</h1>
+    <div>
+        <button id="ajax-trigger">Load Data via AJAX</button>
+    </div>
+    <div>
+        <select id="filter-field">
+            <option value="Country">Country</option>
+            <option value="capital">capital</option>
+            <option value="income_level">income_level</option>
+            <option value="region">region</option>
+          </select>
+          <select id="filter-type">
+            <option value="like">like</option>
+            <option value="=">=</option>
+            <option value="!=">!=</option>
+          </select>
+        
+    <input id="filter-value" type="text" placeholder="value to filter">
+
+    <button id="filter-clear">Clear Filter</button>
+    </div>
+    <div id="example-table"></div>
+    <div>
+        <button id="ajax-trigger2">Load Data via AJAX2</button>
+    </div>
+        <div id="example-table2" width="400" height="200"></div>
+
+    <script>
+        //Build Tabulator
+    var table = new Tabulator("#example-table", {
+        height:"311px",
+        layout:"fitColumns",
+        placeholder:"No Data Set",
+        columns:[
+        {title:"id", field:"id", sorter:"string", width:200},
+            {title:"Country", field:"Country", sorter:"string", width:200},
+            {title:"capital", field:"capital", sorter:"string", width:200},
+            {title:"income_level", field:"income_level", sorter:"string"},
+            {title:"region", field:"region", sorter:"string"},
+        ],
+    });
+    var fieldEl = document.getElementById("filter-field");
+    var typeEl = document.getElementById("filter-type");
+    var valueEl = document.getElementById("filter-value");
+    function updateFilter(){
+    var filterVal = fieldEl.options[fieldEl.selectedIndex].value;
+    var typeVal = typeEl.options[typeEl.selectedIndex].value;
+
+    var filter = filterVal;
+
+    if(filterVal == "function" ){
+        typeEl.disabled = true;
+        valueEl.disabled = true;
+    }else{
+        typeEl.disabled = false;
+        valueEl.disabled = false;
+    }
+
+    if(filterVal){
+        table.setFilter(filter,typeVal, valueEl.value);
+    }
+    }
+
+    //Update filters on value change
+    document.getElementById("filter-field").addEventListener("change", updateFilter);
+    document.getElementById("filter-type").addEventListener("change", updateFilter);
+    document.getElementById("filter-value").addEventListener("keyup", updateFilter);
+
+
+    document.getElementById("filter-clear").addEventListener("click", function(){
+        fieldEl.value = "";
+        typeEl.value = "=";
+        valueEl.value = "";
+
+        table.clearFilter();
+        });
+    //trigger AJAX load on "Load Data via AJAX" button click
+    document.addEventListener('DOMContentLoaded', function() {
+        table.setData("/cntry_list");
+        var button = document.getElementById('ajax-trigger');
+        button.addEventListener('click', function() {
+            table.setData("/cntry_list");
+        });
+    });
+        var table2 = new Tabulator("#example-table2", {
+        height:"311px",
+        layout:"fitColumns",
+        placeholder:"No Data Set",
+        columns:[
+            {title:"date", field:"date", sorter:"string", width:200},
+            {title:"gdppc", field:"gdppc", sorter:"string", width:200},
+            {title:"country", field:"country", sorter:"string", width:200},
+            ],
+        });
+        
+        document.addEventListener('DOMContentLoaded', function() {
+        var button2 = document.getElementById('ajax-trigger2');
+        button2.addEventListener('click', function() {
+            table2.setData("/gdppc");
+            });
+        });
+
+        </script>
+</body>
+</html>
+
